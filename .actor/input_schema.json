@@ -1,0 +1,44 @@
+{
+    "title": "Python Selenium Scraper",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "start_urls": {
+            "title": "Start URLs",
+            "type": "array",
+            "description": "URLs to start with",
+            "prefill": [
+                { "url": "https://apify.com" }
+            ],
+            "editor": "requestListSources"
+        },
+        "max_depth": {
+            "title": "Maximum depth",
+            "type": "integer",
+            "description": "Depth to which to scrape to",
+            "default": 1
+        },
+        "select_state": {
+            "title": "State",
+            "type": "string",
+            "description": "Select state",
+            "editor": "select",
+            "default": "Arizona",
+            "enum": ["Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas",
+            "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi","Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+            "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+            "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"],
+            "enumTitles": ["Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas",
+            "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi","Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+            "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+            "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"]
+        },
+        "select_company": {
+            "title": "Company",
+            "type": "string",
+            "description": "Select company",
+            "editor": "textfield"
+        }
+    },
+    "required": ["start_urls", "select_state", "select_company"]
+}

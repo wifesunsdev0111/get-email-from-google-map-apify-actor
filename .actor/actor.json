@@ -1,0 +1,62 @@
+{
+	"actorSpecification": 1,
+	"name": "get-company-email-from-google-map-actor",
+	"title": "Getting started with Python and Selenium",
+	"description": "Scrapes titles of websites using Selenium.",
+	"version": "0.0",
+	"meta": {
+		"templateId": "python-selenium"
+	},
+	"input": "./input_schema.json",
+	"dockerfile": "./Dockerfile",
+	"storages": {
+		"dataset": {
+			"actorSpecification": 1,
+			"title": "URLs and their titles",
+			"views": {
+				"titles": {
+					"title": "Companies Contact Information",
+					"transformation": {
+						"fields": [
+							"company_name",
+							"phone_number",
+							"address",
+							"website",
+							"email",
+							"rating_of_reviews"
+						]
+					},
+					"display": {
+						"component": "table",
+						"properties": {
+							"company_name": {
+								"label": "Company Name",
+								"format": "text"
+							},
+							"phone_number": {
+								"label": "Phone Number",
+								"format": "text"
+							},
+							"address": {
+								"label": "Address",
+								"format": "text"
+							},
+							"website": {
+								"label": "Website URL",
+								"format": "text"
+							},
+							"email": {
+								"label": "Email",
+								"format": "text"
+							},
+							"rating_of_reviews": {
+								"label": "Rating of Reviews",
+								"format": "text"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
