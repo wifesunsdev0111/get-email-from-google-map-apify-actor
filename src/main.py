@@ -1,12 +1,3 @@
-"""
-This module defines the `main()` coroutine for the Apify Actor, executed from the `__main__.py` file.
-
-Feel free to modify this file to suit your specific needs.
-
-To build Apify Actors, utilize the Apify SDK toolkit, read more at the official documentation:
-https://docs.apify.com/sdk/python
-"""
-
 from urllib.parse import urljoin
 
 from selenium import webdriver
@@ -16,79 +7,67 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import *
-from webdriver_manager.chrome import ChromeDriverManager
 import re
 import time
 import threading
 
-from apify import Actor
 from time import sleep
+# import re
+# import quickstart
+# import threading
+# import getWebsiteIn
+# import facebook
+# from .getAllCities import *
+# from .getEmail import *
+import getAllCities
+import getEmail
 
-from .getAllCities import *
-from .getWebsiteIn import *
-# from .facebook import *
-from .getEmail import *
+def main():
+    # keyword = input("Enter keyword: ")
+    # location = input("Enter location: ")
+    
+    # print(f"Keyword: {keyword}")
+    # print(f"Location: {location}")
+    keyword = "Sofa restoration"
+    location ="New York"
 
-# To run this Actor locally, you need to have the Selenium Chromedriver installed.
-# https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/
-# When running on the Apify platform, it is already included in the Actor's Docker image.
+    all_cities = getAllCities.get_all_cities(location)
+    cities_count = len(all_cities)
+    print(f'All cities in {location}:', cities_count)
+    
+    #constant to store company and phoen number
+    all_company_and_phone_data = []
 
-
-async def main() -> None:
-    """
-    The main coroutine is being executed using `asyncio.run()`, so do not attempt to make a normal function
-    out of it, it will not work. Asynchronous execution is required for communication with Apify platform,
-    and it also enhances performance in the field of web scraping significantly.
-    """
-    async with Actor:
-        # Read the Actor input
-        actor_input = await Actor.get_input() or {}
-        start_urls = actor_input.get('start_urls', [{'url': 'https://apify.com'}])
-        max_depth = actor_input.get('max_depth', 1)
-
-        state = actor_input.get('select_state')
-        search_company_name = actor_input.get('select_company')
-        facebook_user_email = actor_input.get('facebook_email')
-        facebook_user_password = actor_input.get('facebook_password')
-
-        all_cities = await get_all_cities(state)
-        cities_count = len(all_cities)
-        Actor.log.info(f"All cities count is {cities_count}")
-
-        #constant to store company and phoen number
-        all_company_and_phone_data = []
-
-        #check duplicate data using phone number
-        async def _duplicate_state(businessName, phoneNumber):
-            if len(all_company_and_phone_data) == 0:
-                return False
-            for item in all_company_and_phone_data:
-                if item['company_name'] == businessName and item['phone_number'] == phoneNumber:
-                    return True
+    #check duplicate data using phone number
+    def _duplicate_state(businessName, phoneNumber):
+        if len(all_company_and_phone_data) == 0:
             return False
-           
-
-        if not start_urls:
-            Actor.log.info('No start URLs specified in actor input, exiting...')
-            await Actor.exit()
-
-        # Enqueue the starting URLs in the default request queue
-        default_queue = await Actor.open_request_queue()
-        for start_url in start_urls:
-            url = start_url.get('url')
-            Actor.log.info(f'Enqueuing {url} ...')
-            await default_queue.add_request({'url': url, 'userData': {'depth': 0}})
-
-        # Launch a new Selenium Chrome WebDriver
-        Actor.log.info('Launching Chrome WebDriver...')
-        chrome_options = ChromeOptions()
-        if Actor.config.headless:
-            chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
+        for item in all_company_and_phone_data:
+            if item['company_name'] == businessName and item['phone_number'] == phoneNumber:
+                return True
+        return False
 
 
-        for index, city in enumerate(all_cities):
+    def get_element_by_aria_label(driver, aria_label):
+        buttons = driver.find_elements(By.CSS_SELECTOR, "button[class=\"CsEnBe\"]")
+        print(f"button count = ", len(buttons))
+        for button in buttons:
+            aria_value = button.get_attribute("aria-label")
+            print(f'aria value is ', aria_value)
+            if aria_label in aria_value.lower():
+                return button
+            
+        return None
+    
+    chrome_options = ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+        
+    for index, city in enumerate(all_cities):
             
             driver = webdriver.Chrome(options=chrome_options)
             driver.get("https://www.google.com/maps/")
@@ -99,8 +78,7 @@ async def main() -> None:
             except:
                 pass
 
-            search_string = search_company_name + " in " + city + ", " + state
-            Actor.log.info(f'#______________ Start {search_company_name} scrappper in {city}, {state} _________________#')
+            search_string = keyword + " in " + city + ", " + location
                 
             search_input = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[class=\"fontBodyMedium searchboxinput xiQnY \"]")))
 
@@ -118,7 +96,7 @@ async def main() -> None:
                     # Scroll to the bottom of the page
                     driver.execute_script("arguments[0].scrollTo(0, arguments[0].scrollHeight);", scroll_div)
                     company_lists = driver.find_elements(By.CSS_SELECTOR, "div[class=\"Nv2PK tH5CWc THOPZb \"], div[class=\"Nv2PK Q2HXcd THOPZb \"]")
-                    sleep(7)
+                    sleep(5)
 
                     try:
                         end_contet = driver.find_element(By.CSS_SELECTOR, "span[class=\"HlvSq\"]")
@@ -138,7 +116,6 @@ async def main() -> None:
             sleep(2)
 
             company_count = len(company_lists)
-            Actor.log.info(f'Total company count = {company_count}')
             
             company_urls = []
             for index, company in enumerate(company_lists):
@@ -166,26 +143,16 @@ async def main() -> None:
                 except:
                     pass
                 
-                async def get_element_by_aria_label(driver, aria_label):
-                    buttons = driver.find_elements(By.CSS_SELECTOR, "button[class=\"CsEnBe\"]")
-                    for button in buttons:
-                        aria_value = button.get_attribute("aria-label")
-                        if aria_label in aria_value.lower():
-                            return button
-                        
-                    return None
-                
                 try:
-                    phone_button = await get_element_by_aria_label(driver, "phone:")
-                    phone_number = phone_button.find_element(By.CSS_SELECTOR, "div[class=\"Io6YTe fontBodyMedium kR99db \"]").text
+                    phone_button = driver.find_element(By.XPATH, '//*[@data-item-id[contains(., "phone:")]]')
+                    phone_number = phone_button.find_element(By.XPATH, ".//div[1]//div[2]//div[1]").text
                 except:
                     pass
                 
                 try:
                     cleaned_number = re.sub(r'[+\s]', '', phone_number)
-                    duplicate_state = await _duplicate_state(company_name, cleaned_number)
+                    duplicate_state = _duplicate_state(company_name, cleaned_number)
                 
-                    Actor.log.info(f'Phone number is {cleaned_number} and duplicate state is {duplicate_state}')
                 except:
                     duplicate_state = False
 
@@ -197,11 +164,9 @@ async def main() -> None:
                     })
 
                     try:
-                        website_button = driver.find_element(By.CSS_SELECTOR, "div[class=\"rogA2c ITvuef\"]")
-                        website_parent = website_button.find_element(By.XPATH, 'ancestor::div[2]')
-                        website_a = website_parent.find_element(By.CSS_SELECTOR, "a[class=\"CsEnBe\"]")
-                        google_map_domain = website_button.find_element(By.CSS_SELECTOR, "div[class=\"Io6YTe fontBodyMedium kR99db \"]").text
-                        google_map_website = website_a.get_attribute("href")
+                        website_button = driver.find_element(By.XPATH, "//a[@data-item-id='authority']")
+                        google_map_domain = website_button.find_element(By.XPATH, ".//div[1]//div[2]//div[1]").text
+                        google_map_website = website_button.get_attribute("href")
                     except:
                         pass
 
@@ -216,8 +181,8 @@ async def main() -> None:
                             website = "https://www." + google_map_domain + "/"
                         
                     try:
-                        location_button = await get_element_by_aria_label(driver, "address")
-                        location_name = location_button.find_element(By.CSS_SELECTOR, "div[class=\"Io6YTe fontBodyMedium kR99db \"]").text
+                        location_button = driver.find_element(By.XPATH, "//button[@data-item-id='address']")
+                        location_name = location_button.find_element(By.XPATH, ".//div[1]//div[2]//div[1]").text
                     except:
                         pass
                     
@@ -229,61 +194,16 @@ async def main() -> None:
                     except:
                         pass
                     
-                    # if "facebook.com" in website:
-                    #     try:
-                    #         fb_email, fb_phone, fb_address = await get_email_from_facebook(website, facebook_user_email, facebook_user_password)
-                    #         email = fb_email
-                    #         if phone_number == "":
-                    #             phone_number = fb_phone
-                    #         if location_name == "":
-                    #             location_name = fb_address
-                    #         facebook_url = website
-                    #     except:
-                    #         pass
-                    # else:
-                        # # try:
-                        # start_time = time.time()
-
-                        # # Create a thread to execute the code
-                        # thread = threading.Thread(target=lambda: setattr(threading.currentThread(), 'result', extract_company_contact_info(website)))
-                        # thread.start()
-
-                        # # Measure the execution time at 1-second intervals
-                        # while thread.is_alive():
-                        #     elapsed_time = time.time() - start_time
-                        #     time.sleep(1)
-                        #     if elapsed_time > 60:
-                        #         thread.cancel()
-                        #         break
-                        # # Retrieve the result from the thread
-                        
-                        # except:
-                        #     pass
+                    
 
                     try:
                         if len(website) > 10:
-                            email = await extract_company_contact_info(website)
+                            email, facebook_url = getEmail.extract_company_contact_info(website)
                     except:
                         email = []
                         pass
                                 
-                    # try:
-                    #     facebook_url = await get_facebook_in(company_name + " in " + city)
-                    # except:
-                    #     pass
                     
-                    # if len(email) == 0 and facebook_url != "":
-                    #     try:
-                    #         Actor.log.info(f'facebook link for get email is {facebook_url}')
-                    #         facebook_email, facebook_phone, facebook_address = await get_email_from_facebook(facebook_url, facebook_user_email, facebook_user_password)
-                    #         email = facebook_email
-                    #         if phone_number == "":
-                    #             phone_number = facebook_phone
-                    #         if location_name == "":
-                    #             location_name = facebook_address    
-                    #     except:
-                    #         pass
-
                     print(f'final email = ', email)
 
                     try:
@@ -292,8 +212,9 @@ async def main() -> None:
                     
                     except:
                         pass
-                
-                    await Actor.push_data([{'company_name': company_name, 'phone_number': cleaned_number, 'address': location_name, 'website': website, "email": email_string, 'rating_of_reviews': rating_of_reviews}])
+                    data = {'company_name': company_name, 'phone_number': cleaned_number, 'address': location_name, 'website': website, "email": email_string, 'rating_of_reviews': rating_of_reviews, "facebook": facebook_url}
+                    print(data)
+                    #  await Actor.push_data([{'company_name': company_name, 'phone_number': cleaned_number, 'address': location_name, 'website': website, "email": email_string, 'rating_of_reviews': rating_of_reviews}])
             
                 else:
                     sleep(2)
@@ -302,4 +223,7 @@ async def main() -> None:
             driver.quit()
             sleep(4)
 
-        
+
+if __name__ == "__main__":
+    main()
+

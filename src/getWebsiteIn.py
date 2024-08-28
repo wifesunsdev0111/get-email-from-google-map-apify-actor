@@ -1,15 +1,14 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import *
 from time import sleep
 
 
-async def get_website_in(search_index):
-    chrome_options = ChromeOptions()
+def get_website_in(search_index):
+    chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
@@ -41,6 +40,8 @@ async def get_website_in(search_index):
             search_result_list_last = research_div.find_elements(By.CSS_SELECTOR, "div[class=\"TzHB6b cLjAic K7khPe\"]")
             search_result_lists = search_result_list_first + search_result_list_last
         
+        print(f'componet list = ', len(search_result_lists))
+        
         search_result = search_result_lists[0]
         url_dom_parent = WebDriverWait(search_result, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class=\"yuRUbf\"]")))
         url_dom = url_dom_parent.find_element(By.TAG_NAME, "a")
@@ -50,14 +51,11 @@ async def get_website_in(search_index):
         pass
 
     driver.quit()
-    if len(url) < 51:
-        return url
-    else:
-        return ""
+    return url
 
 
-async def get_facebook_in(search_index):
-    chrome_options = ChromeOptions()
+def get_facebook_in(search_index):
+    chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--disable-dev-shm-usage')
@@ -92,7 +90,7 @@ async def get_facebook_in(search_index):
             search_result_list_last = research_div.find_elements(By.CSS_SELECTOR, "div[class=\"TzHB6b cLjAic K7khPe\"]")
             search_result_lists = search_result_list_first + search_result_list_last
 
-        # print(f'componet list = ', len(search_result_lists))
+        print(f'componet list = ', len(search_result_lists))
         
         sleep(2)
 
@@ -103,14 +101,17 @@ async def get_facebook_in(search_index):
                 
                 title = url_dom.find_element(By.CSS_SELECTOR, "span[class=\"VuuXrf\"]").text
 
+                print(f'get facebook title = ', title)
+            
                 exact_search_index = search_index.replace(" texas", "")
 
                 if "facebook" in title.lower():
+                    print(f'get facebook link = ', exact_search_index, title)
                     url = url_dom.get_attribute("href")
                     break
             except:
                 continue
-        print(f"get facebook url = ", url)
+        print(f"facebook url = ", url)
     except:
         url = ""
         pass
@@ -118,5 +119,10 @@ async def get_facebook_in(search_index):
     driver.quit()
     return url
 
+# result = get_linkedIn_link("Mount Vernon Dental Smiles 8101 Hinson Farm Rd #216, Alexandria, VA 22306, Yhdysvallat, LinkedIn")
+
+# print(f'link = ', result)
+
+# print(get_facebook_in("All Florida Enterprises florida"))
     
             

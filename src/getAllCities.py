@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-async def get_all_cities(state):
+def get_all_cities(state):
     # URL for the list of counties in Texas
     url = "https://en.wikipedia.org/wiki/List_of_counties_in_" + state
 
@@ -23,5 +23,5 @@ async def get_all_cities(state):
     return counties
 
 
-print(get_all_cities("Arizona"))
+# print(get_all_cities("Arizona"))
 
